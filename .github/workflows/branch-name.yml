@@ -1,0 +1,31 @@
+name: Branch name
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: branch-name-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  branch-name:
+    name: Branch name
+    # O Dependabot cria branches como dependabot/maven/..., que não seguem o padrão
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Validate branch name (prefixo/numero-do-card)
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          if [[ ! "$BRANCH" =~ ^(feat|fix|refact)/[0-9]+$ ]]; then
+            echo "::error::Branch '$BRANCH' fora do padrão prefixo/numero-do-card (ex.: feat/1234). Prefixos: feat, fix, refact."
+            exit 1
+          fi
+          echo "Branch '$BRANCH' ok."

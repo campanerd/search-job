@@ -1,0 +1,2 @@
+# Fim de linha LF em todo o projeto (o formatador roda em Linux no CI)
+* text=auto eol=lf

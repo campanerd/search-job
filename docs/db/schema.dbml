@@ -31,7 +31,7 @@ Enum inactive_reason {
   BROKEN_LINK
 }
 
-Table profile {
+Table app_user {
   id integer [pk, increment]
   name text [not null]
   created_at timestamp [not null]

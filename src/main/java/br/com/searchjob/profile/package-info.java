@@ -3,4 +3,4 @@
  * e as candidaturas (se já se inscreveu na vaga). Tudo salvo no banco.
  * Mesma divisão do domínio job: entity, enums, dto, web, repository e service.
  */
-package org.example.searchjob.profile;
+package br.com.searchjob.profile;

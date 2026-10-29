@@ -1,4 +1,4 @@
-package org.example.searchjob.health;
+package br.com.searchjob.health;
 
 import java.util.Map;
 

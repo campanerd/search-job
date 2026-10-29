@@ -1,4 +1,4 @@
-package org.example.searchjob;
+package br.com.searchjob;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

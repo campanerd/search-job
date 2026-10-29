@@ -24,8 +24,8 @@ public class ProfileController {
 	public ResponseEntity<ProfileResponse> create(@RequestBody @Valid ProfileRequest request) {
 		Profile created = this.command.create(request.name());
 
-		ProfileResponse body = new ProfileResponse(created.getId(), created.getName(),
-				created.getCreatedAt(), created.getUpdatedAt());
+		ProfileResponse body = new ProfileResponse(created.getId(), created.getName(), created.getCreatedAt(),
+				created.getUpdatedAt());
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(body);
 	}

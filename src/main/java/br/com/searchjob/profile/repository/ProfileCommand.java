@@ -16,4 +16,5 @@ public class ProfileCommand {
 		Profile profile = new Profile(name.trim());
 		return this.repository.save(profile);
 	}
+
 }

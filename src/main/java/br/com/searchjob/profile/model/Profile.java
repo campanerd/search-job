@@ -32,4 +32,5 @@ public class Profile {
 	public Profile(String name) {
 		this.name = name;
 	}
+
 }

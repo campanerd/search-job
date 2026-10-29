@@ -1,0 +1,150 @@
+Enum user_role {
+  USER
+  ADMIN
+}
+
+Enum trait_type {
+  TECHNOLOGY
+  SENIORITY
+  MODALITY
+  CONTRACT
+  STATUS
+  IGNORED
+}
+
+Enum requirement_type {
+  REQUIRED
+  PREFERRED
+  AVOID
+}
+
+Enum application_status {
+  SAVED
+  APPLIED
+  INTERVIEW
+  REJECTED
+  DISCARDED
+}
+
+Enum inactive_reason {
+  MISSING_FROM_SOURCE
+  BROKEN_LINK
+}
+
+Table app_user {
+  id integer [pk, increment]
+  name text [not null]
+  email text [not null, unique]
+  password_hash text [not null, note: 'never the plain password; BCrypt hash']
+  role user_role [not null, default: 'USER', note: 'ADMIN can sync and edit traits']
+  active integer [not null, default: 1]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  last_login_at timestamp
+}
+
+Table profile {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > app_user.id]
+  name text [not null, note: "'Davi - Java Backend'"]
+  city text [note: 'optional']
+  state text [note: 'optional']
+  min_salary integer [note: 'optional']
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  indexes {
+    (user_id, name) [unique]
+  }
+}
+
+Table profile_criterion {
+  id integer [pk, increment]
+  profile_id integer [not null, ref: > profile.id]
+  trait_id integer [not null, ref: > trait.id]
+  requirement requirement_type [not null]
+  weight integer [not null, default: 1, note: 'only used when PREFERRED']
+
+  indexes {
+    (profile_id, trait_id) [unique]
+  }
+}
+
+Table job {
+  id integer [pk, increment]
+  source text [not null, note: "'APIBR'"]
+  external_id text [not null, note: 'issue id in the API']
+  repository text [not null, note: "'backend-br/vagas'"]
+  title text [not null]
+  url text [not null]
+  author text
+  company text
+  city text
+  state text
+  country text
+  salary_min integer
+  salary_max integer
+  description text [note: 'optional; API BR does not provide it']
+  original_labels text [note: 'JSON with the labels as they came']
+  created_at timestamp [note: 'date at the source']
+  updated_at timestamp [note: 'date at the source']
+  synced_at timestamp [not null, note: 'last time we saw it']
+  active integer [not null, default: 1]
+  inactive_reason inactive_reason [note: 'only set when active = 0']
+
+  indexes {
+    (source, external_id) [unique]
+    active
+  }
+}
+
+Table trait {
+  id integer [pk, increment]
+  type trait_type [not null]
+  name text [not null]
+
+  indexes {
+    (type, name) [unique]
+  }
+}
+
+Table job_trait {
+  job_id integer [not null, ref: > job.id]
+  trait_id integer [not null, ref: > trait.id]
+
+  indexes {
+    (job_id, trait_id) [pk]
+    trait_id
+  }
+}
+
+Table job_application {
+  user_id integer [not null, ref: > app_user.id]
+  job_id integer [not null, ref: > job.id]
+  status application_status [not null]
+  applied_at timestamp [note: 'when it became APPLIED']
+  notes text
+  updated_at timestamp [not null]
+
+  indexes {
+    (user_id, job_id) [pk]
+    status
+  }
+}
+
+Table unmapped_label {
+  label text [pk]
+  occurrences integer [not null, default: 1]
+  last_seen_at timestamp [not null]
+}
+
+Table sync_run {
+  id integer [pk, increment]
+  source text [not null]
+  started_at timestamp [not null]
+  finished_at timestamp
+  read_count integer
+  new_count integer
+  updated_count integer
+  deactivated_count integer
+}

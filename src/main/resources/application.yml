@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: search-job
+  datasource:
+    url: jdbc:sqlite:data/search-job.db
+    hikari:
+      # SQLite aceita uma escrita por vez; mais de uma conexão só gera "database is locked"
+      maximum-pool-size: 1
+  flyway:
+    enabled: true
+    locations: classpath:db/migration

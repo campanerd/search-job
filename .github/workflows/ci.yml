@@ -57,15 +57,66 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Test Bruno sync script
+        run: node --test scripts/bruno-sync.test.mjs
+
+      # Gera numa pasta à parte: o Bruno CLI não atualiza uma coleção existente
       - name: Generate Bruno collection
         run: >
           npx -y @usebruno/cli@4.3.0 import openapi
           --source target/openapi.json
-          --output bruno
+          --output bruno-generated
           --collection-name search-job
           --collection-format=bru
 
       - uses: actions/upload-artifact@v7
         with:
           name: bruno-collection
-          path: bruno
+          path: bruno-generated
+
+  # Acrescenta ao PR as requests do Bruno que faltam para os endpoints novos (nunca altera as existentes)
+  bruno-sync:
+    name: Bruno sync
+    needs: build
+    # Só em PR do próprio repositório: PR de fork não pode receber commit
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref }}
+          # Com o segredo BRUNO_SYNC_TOKEN (token pessoal com escrita em conteúdo), o push do robô
+          # dispara o CI de novo. Sem ele, usa o token padrão e o push NÃO dispara o CI.
+          token: ${{ secrets.BRUNO_SYNC_TOKEN || github.token }}
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: bruno-collection
+          path: bruno-generated
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Add missing Bruno requests
+        run: node scripts/bruno-sync.mjs --generated bruno-generated
+
+      - name: Commit and push
+        env:
+          HAS_SYNC_TOKEN: ${{ secrets.BRUNO_SYNC_TOKEN != '' }}
+        run: |
+          if [ -z "$(git status --porcelain bruno)" ]; then
+            echo "Bruno em dia, nada a commitar."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bruno
+          git commit -m "feat: add missing Bruno requests"
+          git push
+          if [ "$HAS_SYNC_TOKEN" != "true" ]; then
+            echo "::notice::Commit feito com o token padrão, então o CI não roda de novo nele. Crie o segredo BRUNO_SYNC_TOKEN para o CI rodar."
+          fi

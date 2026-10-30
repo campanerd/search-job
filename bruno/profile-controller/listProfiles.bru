@@ -1,0 +1,50 @@
+meta {
+  name: listProfiles
+  type: http
+  seq: 5
+  tags: [
+    profile-controller
+  ]
+}
+
+get {
+  url: {{baseUrl}}/profiles
+  body: none
+  auth: inherit
+}
+
+example {
+  name: 200 Response
+  description: OK
+  
+  request: {
+    url: {{baseUrl}}/profiles
+    method: GET
+    mode: none
+  }
+  
+  response: {
+    headers: {
+      Content-Type: */*
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+        [
+          {
+            "id": 0,
+            "name": "",
+            "createdAt": "",
+            "updatedAt": ""
+          }
+        ]
+      '''
+    }
+  }
+}

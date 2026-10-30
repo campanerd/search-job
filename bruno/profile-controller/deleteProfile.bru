@@ -1,0 +1,46 @@
+meta {
+  name: deleteProfile
+  type: http
+  seq: 4
+  tags: [
+    profile-controller
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/profiles/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 
+}
+
+example {
+  name: 204 Response
+  description: No Content
+  
+  request: {
+    url: {{baseUrl}}/profiles/:id
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

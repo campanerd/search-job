@@ -15,6 +15,17 @@ spring:
     hibernate:
       # O Flyway cria as tabelas; o Hibernate só confere se batem com as entidades
       ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
 
 server:
   port: 8765
+
+logging:
+  level:
+    # Cada requisição (ex.: GET "/users/1" e o status da resposta)
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
+    # As queries que o Hibernate executa e os valores dos parâmetros
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE

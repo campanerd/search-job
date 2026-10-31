@@ -1,0 +1,137 @@
+meta {
+  name: Cria um usuário
+  type: http
+  seq: 5
+  tags: [
+    Usuários
+  ]
+}
+
+post {
+  url: {{baseUrl}}/users
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": ""
+  }
+}
+
+example {
+  name: 201 Response
+  description: Usuário criado
+  
+  request: {
+    url: {{baseUrl}}/users
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "name": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: */*
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: text
+      content: '''
+        {
+          "id": 0,
+          "name": "",
+          "createdAt": "",
+          "updatedAt": ""
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 400 Response
+  description: Nome em branco ou com mais de 100 caracteres
+  
+  request: {
+    url: {{baseUrl}}/users
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "name": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: */*
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: text
+      content: '''
+        {
+          "id": 0,
+          "name": "",
+          "createdAt": "",
+          "updatedAt": ""
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 409 Response
+  description: Já existe um usuário com esse nome (sem diferenciar maiúsculas)
+  
+  request: {
+    url: {{baseUrl}}/users
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "name": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: */*
+    }
+  
+    status: {
+      code: 409
+      text: Conflict
+    }
+  
+    body: {
+      type: text
+      content: '''
+        {
+          "id": 0,
+          "name": "",
+          "createdAt": "",
+          "updatedAt": ""
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,50 @@
+meta {
+  name: Lista os usuários, ordenados por id
+  type: http
+  seq: 4
+  tags: [
+    Usuários
+  ]
+}
+
+get {
+  url: {{baseUrl}}/users
+  body: none
+  auth: inherit
+}
+
+example {
+  name: 200 Response
+  description: Lista de usuários (vazia se não houver nenhum)
+  
+  request: {
+    url: {{baseUrl}}/users
+    method: GET
+    mode: none
+  }
+  
+  response: {
+    headers: {
+      Content-Type: */*
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+        [
+          {
+            "id": 0,
+            "name": "",
+            "createdAt": "",
+            "updatedAt": ""
+          }
+        ]
+      '''
+    }
+  }
+}

@@ -1,8 +1,3 @@
-Enum user_role {
-  USER
-  ADMIN
-}
-
 Enum trait_type {
   TECHNOLOGY
   SENIORITY
@@ -33,9 +28,13 @@ Enum inactive_reason {
 
 Table app_user {
   id integer [pk, increment]
-  name text [not null]
+  name text [not null, note: 'unique, ignoring case (COLLATE NOCASE)']
   created_at timestamp [not null]
   updated_at timestamp [not null]
+
+  indexes {
+    name [unique]
+  }
 }
 
 Table profile {

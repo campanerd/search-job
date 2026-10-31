@@ -1,0 +1,74 @@
+meta {
+  name: Apaga um usuário
+  type: http
+  seq: 3
+  tags: [
+    Usuários
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/users/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 
+}
+
+example {
+  name: 204 Response
+  description: Usuário apagado
+  
+  request: {
+    url: {{baseUrl}}/users/:id
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Usuário não existe
+  
+  request: {
+    url: {{baseUrl}}/users/:id
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

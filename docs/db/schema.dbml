@@ -26,6 +26,42 @@ Enum inactive_reason {
   BROKEN_LINK
 }
 
+Enum level {
+  INTERN
+  JUNIOR
+  MID
+  SENIOR
+  SPECIALIST
+  TECH_LEAD
+  STAFF
+  COORDINATOR
+}
+
+Enum area {
+  QA
+  BACKEND
+  FRONTEND
+  FULLSTACK
+  MOBILE
+  DEVOPS
+  DATA
+  CX
+  SECURITY
+  AI
+  PRODUCT
+}
+
+Enum work_mode {
+  REMOTE
+  ONSITE
+  HYBRID
+}
+
+Enum contract_type {
+  CLT
+  PJ
+}
+
 Table app_user {
   id integer [pk, increment]
   name text [not null, note: 'unique, ignoring case (COLLATE NOCASE)']
@@ -41,6 +77,10 @@ Table profile {
   id integer [pk, increment]
   user_id integer [not null, ref: > app_user.id]
   name text [not null, note: "'Davi - Java Backend'"]
+  level level [note: 'optional']
+  area area [note: 'optional']
+  work_mode work_mode [note: 'optional']
+  contract_type contract_type [note: 'optional']
   city text [note: 'optional']
   state text [note: 'optional']
   min_salary integer [note: 'optional']
@@ -48,7 +88,7 @@ Table profile {
   updated_at timestamp [not null]
 
   indexes {
-    (user_id, name) [unique]
+    (user_id, name) [unique, note: 'unique per user, ignoring case (COLLATE NOCASE)']
   }
 }
 

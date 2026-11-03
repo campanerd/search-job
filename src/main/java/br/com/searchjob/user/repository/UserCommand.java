@@ -1,5 +1,6 @@
 package br.com.searchjob.user.repository;
 
+import br.com.searchjob.profile.repository.ProfileRepository;
 import br.com.searchjob.user.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,8 @@ public class UserCommand {
 	private final UserRepository repository;
 
 	private final UserQuery query;
+
+	private final ProfileRepository profileRepository;
 
 	@Transactional
 	public User createUser(String name) {
@@ -37,7 +40,11 @@ public class UserCommand {
 
 	@Transactional
 	public void deleteUser(Long id) {
-		this.repository.delete(this.query.getUser(id));
+		User user = this.query.getUser(id);
+		if (this.profileRepository.existsByUserId(id)) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "User " + id + " still has profiles");
+		}
+		this.repository.delete(user);
 	}
 
 }

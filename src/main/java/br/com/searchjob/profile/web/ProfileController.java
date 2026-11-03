@@ -28,17 +28,23 @@ public class ProfileController {
 	@PostMapping
 	@Operation(summary = "Cria um perfil")
 	@ApiResponse(responseCode = "201", description = "Perfil criado")
-	@ApiResponse(responseCode = "400", description = "Nome em branco ou com mais de 100 caracteres")
+	@ApiResponse(responseCode = "400",
+			description = "userId ausente, nome em branco, valor fora do padrão ou salário negativo")
+	@ApiResponse(responseCode = "404", description = "Usuário não existe")
+	@ApiResponse(responseCode = "409",
+			description = "O usuário já tem um perfil com esse nome (sem diferenciar maiúsculas)")
 	public ResponseEntity<ProfileResponse> createProfile(@RequestBody @Valid ProfileRequest request) {
 		return ResponseEntity.status(HttpStatus.CREATED)
-			.body(ProfileResponse.from(this.command.createProfile(request.name())));
+			.body(ProfileResponse.from(this.command.createProfile(request)));
 	}
 
 	@GetMapping
-	@Operation(summary = "Lista os perfis, ordenados por id")
-	@ApiResponse(responseCode = "200", description = "Lista de perfis (vazia se não houver nenhum)")
-	public List<ProfileResponse> listProfiles() {
-		return this.query.listProfiles().stream().map(ProfileResponse::from).toList();
+	@Operation(summary = "Lista os perfis de um usuário, ordenados por id")
+	@ApiResponse(responseCode = "200", description = "Lista de perfis (vazia se o usuário não tiver nenhum)")
+	@ApiResponse(responseCode = "400", description = "userId ausente")
+	@ApiResponse(responseCode = "404", description = "Usuário não existe")
+	public List<ProfileResponse> listProfiles(@RequestParam Long userId) {
+		return this.query.listProfiles(userId).stream().map(ProfileResponse::from).toList();
 	}
 
 	@GetMapping("/{id}")
@@ -50,12 +56,15 @@ public class ProfileController {
 	}
 
 	@PutMapping("/{id}")
-	@Operation(summary = "Troca o nome de um perfil")
+	@Operation(summary = "Troca o nome e os filtros de um perfil (o userId tem de ser o do dono)")
 	@ApiResponse(responseCode = "200", description = "Perfil atualizado")
-	@ApiResponse(responseCode = "400", description = "Nome em branco ou com mais de 100 caracteres")
+	@ApiResponse(responseCode = "400",
+			description = "userId ausente ou diferente do dono, nome em branco, valor fora do padrão ou salário negativo")
 	@ApiResponse(responseCode = "404", description = "Perfil não existe")
+	@ApiResponse(responseCode = "409",
+			description = "O usuário já tem outro perfil com esse nome (sem diferenciar maiúsculas)")
 	public ProfileResponse updateProfile(@PathVariable Long id, @RequestBody @Valid ProfileRequest request) {
-		return ProfileResponse.from(this.command.updateProfile(id, request.name()));
+		return ProfileResponse.from(this.command.updateProfile(id, request));
 	}
 
 	@DeleteMapping("/{id}")

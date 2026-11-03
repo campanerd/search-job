@@ -117,3 +117,140 @@ test('command line: --check exits with 1 when something is missing and 0 when up
     const upToDate = spawnSync(process.execPath, [...args, '--check'], { encoding: 'utf8' });
     assert.equal(upToDate.status, 0);
 });
+
+function requestWith(name, seq, method, url, { body, query } = {}) {
+    let text = request(name, seq, method, url).replace('body: none', `body: ${body ? 'json' : 'none'}`);
+    if (query) {
+        text += `\nparams:query {\n${query.map((line) => `  ${line}`).join('\n')}\n}\n`;
+    }
+    if (body) {
+        text += `\nbody:json {\n${JSON.stringify(body, null, 2).replace(/^/gm, '  ')}\n}\n`;
+    }
+    return text;
+}
+
+function bodyOf(text) {
+    const match = /^body:json \{\n([\s\S]*?)^\}$/m.exec(text);
+    return JSON.parse(match[1].replace(/^ {2}/gm, ''));
+}
+
+function queryOf(text) {
+    const match = /^params:query \{\n([\s\S]*?)^\}$/m.exec(text);
+    return match ? match[1].split('\n').filter(Boolean).map((line) => line.trim()) : [];
+}
+
+test('update: merges the JSON body by field, keeping the values already in the collection', () => {
+    write(target, 'profiles/create.bru', requestWith('create', 1, 'post', '/profiles', {
+        body: { name: 'Java Backend', old: 1, filters: { level: 'JUNIOR', gone: true }, tags: ['a'] },
+    }));
+    write(generated, 'profiles/createProfile.bru', requestWith('createProfile', 2, 'post', '/profiles', {
+        body: { userId: 0, name: '', filters: { level: 'INTERN', area: 'QA' }, tags: [] },
+    }));
+
+    const { updated } = sync({ generated, target });
+
+    assert.deepEqual(updated, [{ file: 'profiles/create.bru', key: 'POST {{baseUrl}}/profiles', what: ['corpo'] }]);
+    assert.deepEqual(bodyOf(read(target, 'profiles/create.bru')), {
+        userId: 0,
+        name: 'Java Backend',
+        filters: { level: 'JUNIOR', area: 'QA' },
+        tags: ['a'],
+    });
+});
+
+test('update: adds the JSON body when the request had none', () => {
+    write(generated, 'profiles/createProfile.bru', requestWith('createProfile', 2, 'post', '/profiles', {
+        body: { name: '' },
+    }));
+
+    sync({ generated, target });
+
+    const text = read(target, 'profiles/create.bru');
+    assert.match(text, /body: json/);
+    assert.deepEqual(bodyOf(text), { name: '' });
+});
+
+test('update: merges the query params, keeping values and disabled marks', () => {
+    write(target, 'profiles/list.bru', requestWith('list', 1, 'get', '/profiles', { query: ['~userId: 5', 'old: x'] }));
+    write(generated, 'profiles/listProfiles.bru', requestWith('listProfiles', 3, 'get', '/profiles', {
+        query: ['userId: ', 'page: '],
+    }));
+    write(target, 'profiles/create.bru', request('create', 2, 'post', '/profiles/other'));
+
+    const { updated } = sync({ generated, target });
+
+    const list = updated.find((u) => u.file === 'profiles/list.bru');
+    assert.deepEqual(list.what, ['query']);
+    assert.deepEqual(queryOf(read(target, 'profiles/list.bru')), ['~userId: 5', 'page:']);
+});
+
+test('update: adds a query block when the request had none and drops it when the contract has none', () => {
+    write(target, 'profiles/list.bru', requestWith('list', 1, 'get', '/profiles', { query: ['old: x'] }));
+    write(target, 'profiles/other.bru', request('other', 2, 'get', '/other'));
+    write(generated, 'profiles/listProfiles.bru', requestWith('listProfiles', 3, 'get', '/profiles'));
+    write(generated, 'profiles/other.bru', requestWith('other', 4, 'get', '/other', { query: ['q: '] }));
+
+    sync({ generated, target });
+
+    assert.deepEqual(queryOf(read(target, 'profiles/list.bru')), []);
+    assert.doesNotMatch(read(target, 'profiles/list.bru'), /params:query/);
+    assert.deepEqual(queryOf(read(target, 'profiles/other.bru')), ['q:']);
+});
+
+test('update: leaves a body that is not valid JSON untouched', () => {
+    const custom = request('create', 1, 'post', '/profiles').replace('body: none', 'body: json')
+        + '\nbody:json {\n  {\n    "name": {{profileName}}\n  }\n}\n';
+    write(target, 'profiles/create.bru', custom);
+    write(generated, 'profiles/createProfile.bru', requestWith('createProfile', 2, 'post', '/profiles', {
+        body: { userId: 0, name: '' },
+    }));
+
+    sync({ generated, target });
+
+    assert.equal(read(target, 'profiles/create.bru'), custom);
+});
+
+test('update: does not touch the name, tags or examples of an existing request', () => {
+    const extra = '\nexample {\n  name: 200 Response\n  request: {\n    params:query: {\n      old: x\n    }\n  }\n}\n';
+    write(target, 'profiles/create.bru', requestWith('my own name', 1, 'post', '/profiles', { body: { name: 'x' } }) + extra);
+    write(generated, 'profiles/createProfile.bru', requestWith('createProfile', 2, 'post', '/profiles', {
+        body: { name: '', userId: 0 },
+    }));
+
+    sync({ generated, target });
+
+    const text = read(target, 'profiles/create.bru');
+    assert.match(text, /name: my own name/);
+    assert.ok(text.endsWith(extra));
+});
+
+test('update: is idempotent and --check reports without writing', () => {
+    write(target, 'profiles/create.bru', requestWith('create', 1, 'post', '/profiles', { body: { name: 'x' } }));
+    write(generated, 'profiles/createProfile.bru', requestWith('createProfile', 2, 'post', '/profiles', {
+        body: { name: '', userId: 0 },
+    }));
+    const before = read(target, 'profiles/create.bru');
+
+    assert.equal(sync({ generated, target, check: true }).updated.length, 1);
+    assert.equal(read(target, 'profiles/create.bru'), before);
+
+    sync({ generated, target });
+    assert.deepEqual(sync({ generated, target }).updated, []);
+});
+
+test('command line: --check exits with 1 when an existing request is outdated', () => {
+    write(target, 'profiles/create.bru', requestWith('create', 1, 'post', '/profiles', { body: { name: 'x' } }));
+    write(generated, 'profiles/createProfile.bru', requestWith('createProfile', 2, 'post', '/profiles', {
+        body: { name: '', userId: 0 },
+    }));
+    const args = [script, '--generated', generated, '--target', target];
+    execFileSync(process.execPath, args);
+
+    const upToDate = spawnSync(process.execPath, [...args, '--check'], { encoding: 'utf8' });
+    assert.equal(upToDate.status, 0);
+
+    write(target, 'profiles/create.bru', requestWith('create', 1, 'post', '/profiles', { body: { name: 'x' } }));
+    const stale = spawnSync(process.execPath, [...args, '--check'], { encoding: 'utf8' });
+    assert.equal(stale.status, 1);
+    assert.match(stale.stdout, /Desatualizada: profiles\/create\.bru/);
+});

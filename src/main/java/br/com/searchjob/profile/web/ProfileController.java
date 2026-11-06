@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/profiles")
 @RequiredArgsConstructor
-@Tag(name = "Perfis", description = "Cadastro de perfis de busca")
+@Tag(name = "Profiles", description = "Search profile registration")
 public class ProfileController {
 
 	private final ProfileCommand command;
@@ -26,52 +26,53 @@ public class ProfileController {
 	private final ProfileQuery query;
 
 	@PostMapping
-	@Operation(summary = "Cria um perfil")
-	@ApiResponse(responseCode = "201", description = "Perfil criado")
+	@Operation(summary = "Create profile", description = "The profile belongs to the user sent in the body.")
+	@ApiResponse(responseCode = "201", description = "Profile created")
 	@ApiResponse(responseCode = "400",
-			description = "userId ausente, nome em branco, valor fora do padrão ou salário negativo")
-	@ApiResponse(responseCode = "404", description = "Usuário não existe")
-	@ApiResponse(responseCode = "409",
-			description = "O usuário já tem um perfil com esse nome (sem diferenciar maiúsculas)")
+			description = "Missing userId, blank name, invalid value or negative minimum salary")
+	@ApiResponse(responseCode = "404", description = "User not found")
+	@ApiResponse(responseCode = "409", description = "The user already has a profile with this name (case-insensitive)")
 	public ResponseEntity<ProfileResponse> createProfile(@RequestBody @Valid ProfileRequest request) {
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(ProfileResponse.from(this.command.createProfile(request)));
 	}
 
 	@GetMapping
-	@Operation(summary = "Lista os perfis de um usuário, ordenados por id")
-	@ApiResponse(responseCode = "200", description = "Lista de perfis (vazia se o usuário não tiver nenhum)")
-	@ApiResponse(responseCode = "400", description = "userId ausente")
-	@ApiResponse(responseCode = "404", description = "Usuário não existe")
+	@Operation(summary = "List profiles", description = "Lists only the profiles of the given user.")
+	@ApiResponse(responseCode = "200", description = "Profiles ordered by id (empty if the user has none)")
+	@ApiResponse(responseCode = "400", description = "Missing userId")
+	@ApiResponse(responseCode = "404", description = "User not found")
 	public List<ProfileResponse> listProfiles(@RequestParam Long userId) {
 		return this.query.listProfiles(userId).stream().map(ProfileResponse::from).toList();
 	}
 
 	@GetMapping("/{id}")
-	@Operation(summary = "Busca um perfil pelo id")
-	@ApiResponse(responseCode = "200", description = "Perfil encontrado")
-	@ApiResponse(responseCode = "404", description = "Perfil não existe")
+	@Operation(summary = "Get profile by id")
+	@ApiResponse(responseCode = "200", description = "Profile found")
+	@ApiResponse(responseCode = "404", description = "Profile not found")
 	public ProfileResponse getProfile(@PathVariable Long id) {
 		return ProfileResponse.from(this.query.getProfile(id));
 	}
 
 	@PutMapping("/{id}")
-	@Operation(summary = "Troca o nome e os filtros de um perfil (o userId tem de ser o do dono)")
-	@ApiResponse(responseCode = "200", description = "Perfil atualizado")
+	@Operation(summary = "Update profile",
+			description = "Replaces the name and the filters; the userId must be the owner's.")
+	@ApiResponse(responseCode = "200", description = "Profile updated")
 	@ApiResponse(responseCode = "400",
-			description = "userId ausente ou diferente do dono, nome em branco, valor fora do padrão ou salário negativo")
-	@ApiResponse(responseCode = "404", description = "Perfil não existe")
+			description = "Missing userId or different from the owner, blank name, "
+					+ "invalid value or negative minimum salary")
+	@ApiResponse(responseCode = "404", description = "Profile not found")
 	@ApiResponse(responseCode = "409",
-			description = "O usuário já tem outro perfil com esse nome (sem diferenciar maiúsculas)")
+			description = "The user already has another profile with this name (case-insensitive)")
 	public ProfileResponse updateProfile(@PathVariable Long id, @RequestBody @Valid ProfileRequest request) {
 		return ProfileResponse.from(this.command.updateProfile(id, request));
 	}
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@Operation(summary = "Apaga um perfil")
-	@ApiResponse(responseCode = "204", description = "Perfil apagado")
-	@ApiResponse(responseCode = "404", description = "Perfil não existe")
+	@Operation(summary = "Delete profile")
+	@ApiResponse(responseCode = "204", description = "Profile deleted")
+	@ApiResponse(responseCode = "404", description = "Profile not found")
 	public void deleteProfile(@PathVariable Long id) {
 		this.command.deleteProfile(id);
 	}

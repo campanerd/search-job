@@ -1,6 +1,7 @@
 package br.com.searchjob.job.dto;
 
 import br.com.searchjob.job.enums.Source;
+import br.com.searchjob.job.model.Job;
 import br.com.searchjob.profile.enums.Area;
 import br.com.searchjob.profile.enums.ContractType;
 import br.com.searchjob.profile.enums.Level;
@@ -33,5 +34,13 @@ public record JobResponse(
 		LocalDateTime syncedAt
 
 ) {
+
+	public static JobResponse from(Job job) {
+		return new JobResponse(job.getId(), job.getSource(), job.getExternalId(), job.getSlug(), job.getTitle(),
+				job.getCompany(), job.getPlatform(), job.getUrl(), job.getDescription(), job.getLevel(), job.getArea(),
+				job.getWorkMode(), job.getContractType(), job.getCity(), job.getState(), job.getSalaryMin(),
+				job.getSalaryMax(), job.getPublishedAt(), job.isActive(), job.getSyncedAt());
+	}
+
 }
 // @formatter:on

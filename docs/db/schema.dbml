@@ -1,18 +1,3 @@
-Enum trait_type {
-  TECHNOLOGY
-  SENIORITY
-  MODALITY
-  CONTRACT
-  STATUS
-  IGNORED
-}
-
-Enum requirement_type {
-  REQUIRED
-  PREFERRED
-  AVOID
-}
-
 Enum application_status {
   SAVED
   APPLIED
@@ -21,9 +6,8 @@ Enum application_status {
   DISCARDED
 }
 
-Enum inactive_reason {
-  MISSING_FROM_SOURCE
-  BROKEN_LINK
+Enum job_source {
+  MEU_PADRINHO
 }
 
 Enum level {
@@ -92,63 +76,32 @@ Table profile {
   }
 }
 
-Table profile_criterion {
-  id integer [pk, increment]
-  profile_id integer [not null, ref: > profile.id]
-  trait_id integer [not null, ref: > trait.id]
-  requirement requirement_type [not null]
-  weight integer [not null, default: 1, note: 'only used when PREFERRED']
-
-  indexes {
-    (profile_id, trait_id) [unique]
-  }
-}
-
 Table job {
   id integer [pk, increment]
-  source text [not null, note: "'APIBR'"]
-  external_id text [not null, note: 'issue id in the API']
-  repository text [not null, note: "'backend-br/vagas'"]
+  source job_source [not null, note: 'where the job came from; for now only MEU_PADRINHO']
+  external_id text [not null, note: 'job id at the source (nano_id at Meu Padrinho)']
+  slug text [note: 'title part of the job page address at the source']
   title text [not null]
-  url text [not null]
-  author text
   company text
+  platform text [note: 'where the job was published (LinkedIn, Gupy...)']
+  url text [note: 'link to apply; only comes with the job detail, may stay empty']
+  description text [note: 'only comes with the job detail']
+  level level
+  area area
+  work_mode work_mode
+  contract_type contract_type [note: 'only comes with the job detail']
   city text
   state text
-  country text
   salary_min integer
   salary_max integer
-  description text [note: 'optional; API BR does not provide it']
-  original_labels text [note: 'JSON with the labels as they came']
-  created_at timestamp [note: 'date at the source']
-  updated_at timestamp [note: 'date at the source']
-  synced_at timestamp [not null, note: 'last time we saw it']
-  active integer [not null, default: 1]
-  inactive_reason inactive_reason [note: 'only set when active = 0']
+  published_at timestamp [note: 'date of the job at the source']
+  active integer [not null, default: 1, note: '0 = closed at the source (vaga_encerrada)']
+  synced_at timestamp [not null, note: 'last time we saw the job']
 
   indexes {
     (source, external_id) [unique]
     active
-  }
-}
-
-Table trait {
-  id integer [pk, increment]
-  type trait_type [not null]
-  name text [not null]
-
-  indexes {
-    (type, name) [unique]
-  }
-}
-
-Table job_trait {
-  job_id integer [not null, ref: > job.id]
-  trait_id integer [not null, ref: > trait.id]
-
-  indexes {
-    (job_id, trait_id) [pk]
-    trait_id
+    published_at
   }
 }
 
@@ -164,12 +117,6 @@ Table job_application {
     (user_id, job_id) [pk]
     status
   }
-}
-
-Table unmapped_label {
-  label text [pk]
-  occurrences integer [not null, default: 1]
-  last_seen_at timestamp [not null]
 }
 
 Table sync_run {

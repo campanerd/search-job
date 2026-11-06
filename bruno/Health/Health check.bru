@@ -1,24 +1,24 @@
 meta {
-  name: Lista os usuários, ordenados por id
+  name: Health check
   type: http
-  seq: 4
+  seq: 1
   tags: [
-    Usuários
+    Health
   ]
 }
 
 get {
-  url: {{baseUrl}}/users
+  url: {{baseUrl}}/health
   body: none
   auth: inherit
 }
 
 example {
   name: 200 Response
-  description: Lista de usuários (vazia se não houver nenhum)
+  description: Application is up
   
   request: {
-    url: {{baseUrl}}/users
+    url: {{baseUrl}}/health
     method: GET
     mode: none
   }
@@ -36,14 +36,7 @@ example {
     body: {
       type: text
       content: '''
-        [
-          {
-            "id": 0,
-            "name": "",
-            "createdAt": "",
-            "updatedAt": ""
-          }
-        ]
+        {}
       '''
     }
   }

@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @OpenAPIDefinition(info = @Info(title = "search-job API", version = "v1",
-		description = "Cadastro de perfis de busca para filtrar vagas de emprego de TI."))
+		description = "Registration of search profiles to filter IT job openings."))
 public class OpenApiConfig {
 
 }

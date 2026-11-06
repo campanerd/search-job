@@ -1,9 +1,9 @@
 meta {
-  name: Cria um usuário
+  name: Create user
   type: http
   seq: 5
   tags: [
-    Usuários
+    Users
   ]
 }
 
@@ -21,7 +21,7 @@ body:json {
 
 example {
   name: 201 Response
-  description: Usuário criado
+  description: User created
   
   request: {
     url: {{baseUrl}}/users
@@ -60,7 +60,7 @@ example {
 
 example {
   name: 400 Response
-  description: Nome em branco ou com mais de 100 caracteres
+  description: Blank name or longer than 100 characters
   
   request: {
     url: {{baseUrl}}/users
@@ -99,7 +99,7 @@ example {
 
 example {
   name: 409 Response
-  description: Já existe um usuário com esse nome (sem diferenciar maiúsculas)
+  description: A user with this name already exists (case-insensitive)
   
   request: {
     url: {{baseUrl}}/users

@@ -1,14 +1,14 @@
 meta {
-  name: Apaga um usuário
+  name: Delete profile
   type: http
-  seq: 3
+  seq: 4
   tags: [
-    Usuários
+    Profiles
   ]
 }
 
 delete {
-  url: {{baseUrl}}/users/:id
+  url: {{baseUrl}}/profiles/:id
   body: none
   auth: inherit
 }
@@ -19,10 +19,10 @@ params:path {
 
 example {
   name: 204 Response
-  description: Usuário apagado
+  description: Profile deleted
   
   request: {
-    url: {{baseUrl}}/users/:id
+    url: {{baseUrl}}/profiles/:id
     method: DELETE
     mode: none
     params:path: {
@@ -47,10 +47,10 @@ example {
 
 example {
   name: 404 Response
-  description: Usuário não existe
+  description: Profile not found
   
   request: {
-    url: {{baseUrl}}/users/:id
+    url: {{baseUrl}}/profiles/:id
     method: DELETE
     mode: none
     params:path: {

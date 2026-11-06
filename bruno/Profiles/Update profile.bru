@@ -1,0 +1,272 @@
+meta {
+  name: Update profile
+  type: http
+  seq: 3
+  tags: [
+    Profiles
+  ]
+}
+
+put {
+  url: {{baseUrl}}/profiles/:id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  id: 
+}
+
+body:json {
+  {
+    "userId": 0,
+    "name": "",
+    "level": "INTERN",
+    "area": "QA",
+    "workMode": "REMOTE",
+    "contractType": "CLT",
+    "city": "",
+    "state": "",
+    "minSalary": 0
+  }
+}
+
+docs {
+  Replaces the name and the filters; the userId must be the owner's.
+}
+
+example {
+  name: 200 Response
+  description: Profile updated
+  
+  request: {
+    url: {{baseUrl}}/profiles/:id
+    method: PUT
+    mode: json
+    params:path: {
+      id: 
+    }
+  
+    body:json: {
+      {
+        "userId": 0,
+        "name": "",
+        "level": "INTERN",
+        "area": "QA",
+        "workMode": "REMOTE",
+        "contractType": "CLT",
+        "city": "",
+        "state": "",
+        "minSalary": 0
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: */*
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+        {
+          "id": 0,
+          "userId": 0,
+          "name": "",
+          "level": "INTERN",
+          "area": "QA",
+          "workMode": "REMOTE",
+          "contractType": "CLT",
+          "city": "",
+          "state": "",
+          "minSalary": 0,
+          "createdAt": "",
+          "updatedAt": ""
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 400 Response
+  description: Missing userId or different from the owner, blank name, invalid value or negative minimum salary
+  
+  request: {
+    url: {{baseUrl}}/profiles/:id
+    method: PUT
+    mode: json
+    params:path: {
+      id: 
+    }
+  
+    body:json: {
+      {
+        "userId": 0,
+        "name": "",
+        "level": "INTERN",
+        "area": "QA",
+        "workMode": "REMOTE",
+        "contractType": "CLT",
+        "city": "",
+        "state": "",
+        "minSalary": 0
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: */*
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: text
+      content: '''
+        {
+          "id": 0,
+          "userId": 0,
+          "name": "",
+          "level": "INTERN",
+          "area": "QA",
+          "workMode": "REMOTE",
+          "contractType": "CLT",
+          "city": "",
+          "state": "",
+          "minSalary": 0,
+          "createdAt": "",
+          "updatedAt": ""
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Profile not found
+  
+  request: {
+    url: {{baseUrl}}/profiles/:id
+    method: PUT
+    mode: json
+    params:path: {
+      id: 
+    }
+  
+    body:json: {
+      {
+        "userId": 0,
+        "name": "",
+        "level": "INTERN",
+        "area": "QA",
+        "workMode": "REMOTE",
+        "contractType": "CLT",
+        "city": "",
+        "state": "",
+        "minSalary": 0
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: */*
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: text
+      content: '''
+        {
+          "id": 0,
+          "userId": 0,
+          "name": "",
+          "level": "INTERN",
+          "area": "QA",
+          "workMode": "REMOTE",
+          "contractType": "CLT",
+          "city": "",
+          "state": "",
+          "minSalary": 0,
+          "createdAt": "",
+          "updatedAt": ""
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 409 Response
+  description: The user already has another profile with this name (case-insensitive)
+  
+  request: {
+    url: {{baseUrl}}/profiles/:id
+    method: PUT
+    mode: json
+    params:path: {
+      id: 
+    }
+  
+    body:json: {
+      {
+        "userId": 0,
+        "name": "",
+        "level": "INTERN",
+        "area": "QA",
+        "workMode": "REMOTE",
+        "contractType": "CLT",
+        "city": "",
+        "state": "",
+        "minSalary": 0
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: */*
+    }
+  
+    status: {
+      code: 409
+      text: Conflict
+    }
+  
+    body: {
+      type: text
+      content: '''
+        {
+          "id": 0,
+          "userId": 0,
+          "name": "",
+          "level": "INTERN",
+          "area": "QA",
+          "workMode": "REMOTE",
+          "contractType": "CLT",
+          "city": "",
+          "state": "",
+          "minSalary": 0,
+          "createdAt": "",
+          "updatedAt": ""
+        }
+      '''
+    }
+  }
+}

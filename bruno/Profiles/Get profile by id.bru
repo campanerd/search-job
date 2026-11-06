@@ -1,0 +1,108 @@
+meta {
+  name: Get profile by id
+  type: http
+  seq: 2
+  tags: [
+    Profiles
+  ]
+}
+
+get {
+  url: {{baseUrl}}/profiles/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 
+}
+
+example {
+  name: 200 Response
+  description: Profile found
+  
+  request: {
+    url: {{baseUrl}}/profiles/:id
+    method: GET
+    mode: none
+    params:path: {
+      id: 
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: */*
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+        {
+          "id": 0,
+          "userId": 0,
+          "name": "",
+          "level": "INTERN",
+          "area": "QA",
+          "workMode": "REMOTE",
+          "contractType": "CLT",
+          "city": "",
+          "state": "",
+          "minSalary": 0,
+          "createdAt": "",
+          "updatedAt": ""
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Profile not found
+  
+  request: {
+    url: {{baseUrl}}/profiles/:id
+    method: GET
+    mode: none
+    params:path: {
+      id: 
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: */*
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: text
+      content: '''
+        {
+          "id": 0,
+          "userId": 0,
+          "name": "",
+          "level": "INTERN",
+          "area": "QA",
+          "workMode": "REMOTE",
+          "contractType": "CLT",
+          "city": "",
+          "state": "",
+          "minSalary": 0,
+          "createdAt": "",
+          "updatedAt": ""
+        }
+      '''
+    }
+  }
+}

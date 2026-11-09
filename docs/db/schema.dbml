@@ -105,6 +105,25 @@ Table job {
   }
 }
 
+Table technology {
+  id integer [pk, increment]
+  name text [not null, note: 'unique, ignoring case (COLLATE NOCASE); comes from the sync']
+
+  indexes {
+    name [unique]
+  }
+}
+
+Table job_technology {
+  job_id integer [not null, ref: > job.id]
+  technology_id integer [not null, ref: > technology.id]
+
+  indexes {
+    (job_id, technology_id) [pk]
+    technology_id
+  }
+}
+
 Table job_application {
   user_id integer [not null, ref: > app_user.id]
   job_id integer [not null, ref: > job.id]

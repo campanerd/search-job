@@ -60,14 +60,23 @@ jobs:
       - name: Test Bruno sync script
         run: node --test scripts/bruno-sync.test.mjs
 
-      # Gera numa pasta à parte: o Bruno CLI não atualiza uma coleção existente
+      # Gera numa pasta à parte: o Bruno CLI não atualiza uma coleção existente.
+      # Tenta até 3 vezes: o npm às vezes falha por pouco tempo (ex.: versão recém-publicada
+      # que o registry ainda não entregou), e isso já reprovou o CI da main sem culpa do código.
       - name: Generate Bruno collection
-        run: >
-          npx -y @usebruno/cli@4.3.0 import openapi
-          --source target/openapi.json
-          --output bruno-generated
-          --collection-name search-job
-          --collection-format=bru
+        run: |
+          for attempt in 1 2 3; do
+            if npx -y @usebruno/cli@4.3.0 import openapi \
+              --source target/openapi.json \
+              --output bruno-generated \
+              --collection-name search-job \
+              --collection-format=bru; then
+              exit 0
+            fi
+            echo "::warning::Bruno CLI falhou (tentativa $attempt de 3)"
+            sleep 30
+          done
+          exit 1
 
       - uses: actions/upload-artifact@v7
         with:
